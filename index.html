@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMINI ACCOUNTS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 min-h-screen p-6">
+    <div class="max-w-[1800px] mx-auto">
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-slate-600/30">
+            <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-slate-300 to-orange-500 text-center mb-4">
+                GEMINI ACCOUNTS ORGANIZER
+            </h1>
+            
+            <div class="flex flex-wrap justify-center gap-4 mt-4">
+                <div class="bg-green-600/20 px-4 py-2 rounded-lg border border-green-600/50">
+                    <span class="text-green-300 font-bold" id="activeCount">0 Activas</span>
+                </div>
+                <div class="bg-red-700/20 px-4 py-2 rounded-lg border border-red-700/50">
+                    <span class="text-red-300 font-bold" id="inactiveCount">0 Vencidas</span>
+                </div>
+                <div class="bg-blue-600/20 px-4 py-2 rounded-lg border border-blue-600/50">
+                    <span class="text-blue-300 font-bold" id="totalCount">0 Total</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center items-center gap-3 mt-6">
+                <span class="text-orange-400 text-xl">⚙</span>
+                <span class="text-slate-300 font-semibold">FILTRAR:</span>
+                <div class="flex gap-2">
+                    <button onclick="setFilter('Todas')" id="filterTodas" class="px-4 py-2 rounded-lg font-bold transition-all bg-gradient-to-r from-blue-700 to-slate-700 text-white scale-105">
+                        Todas
+                    </button>
+                    <button onclick="setFilter('Activa')" id="filterActiva" class="px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-400 hover:bg-slate-600">
+                        Activas
+                    </button>
+                    <button onclick="setFilter('Vencida')" id="filterVencida" class="px-4 py-2 rounded-lg font-bold transition-all bg-slate-700 text-slate-400 hover:bg-slate-600">
+                        Vencidas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/80 backdrop-blur rounded-xl overflow-hidden border border-slate-700 mb-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-slate-800 via-blue-900 to-slate-800 text-white">
+                            <th class="p-3 text-center font-bold w-8"></th>
+                            <th class="p-3 text-center font-bold w-12">#</th>
+                            <th class="p-3 text-left font-bold">DUEÑO</th>
+                            <th class="p-3 text-left font-bold">EMAIL</th>
+                            <th class="p-3 text-center font-bold">ESTADO</th>
+                            <th class="p-3 text-left font-bold">PROVEEDOR</th>
+                            <th class="p-3 text-left font-bold">TITULAR</th>
+                            <th class="p-3 text-left font-bold">TARJETA</th>
+                            <th class="p-3 text-left font-bold">DIGITOS</th>
+                            <th class="p-3 text-left font-bold">FECHA</th>
+                            <th class="p-3 text-center font-bold">LIMITE NB</th>
+                            <th class="p-3 text-center font-bold">NIVEL</th>
+                            <th class="p-3 text-left font-bold">MODIFICACION</th>
+                            <th class="p-3 text-center font-bold w-16"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="toggleAddForm()" id="addButton" class="w-full bg-gradient-to-r from-blue-700 to-slate-700 hover:from-blue-600 hover:to-slate-600 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-105">
+            <span class="text-2xl">+</span>
+            AGREGAR NUEVA CUENTA
+        </button>
+
+        <div id="addForm" class="hidden bg-slate-800 rounded-xl p-6 border border-slate-600/50 mt-6">
+            <h3 class="text-xl font-bold text-blue-400 mb-4">Nueva Cuenta</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Categoria</label>
+                    <select id="newCategory" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                        <option value="ASTRO PAY GERAL">ASTRO PAY GERAL</option>
+                        <option value="ASTRO PAY MIGUEL">ASTRO PAY MIGUEL</option>
+                        <option value="LIGO MIGUEL">LIGO MIGUEL</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Dueño</label>
+                    <input type="text" id="newOwner" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Email</label>
+                    <input type="email" id="newEmail" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Proveedor</label>
+                    <input type="text" id="newProvider" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Titular</label>
+                    <input type="text" id="newTitular" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Tipo de Tarjeta</label>
+                    <select id="newCardType" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                        <option value="Visa">Visa</option>
+                        <option value="Mastercard">Mastercard</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Ultimos 4 Digitos</label>
+                    <input type="text" maxlength="4" id="newLastDigits" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Fecha</label>
+                    <input type="text" id="newDate" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Estado</label>
+                    <select id="newStatus" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                        <option value="Activa">Activa</option>
+                        <option value="Vencida">Vencida</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Limite NB</label>
+                    <select id="newLimiteNB" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                        <option value="Cerrado">Cerrado</option>
+                        <option value="Abierto">Abierto</option>
+                        <option value="Casi Tope">Casi Tope</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 text-sm mb-2">Nivel</label>
+                    <select id="newNivel" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600 focus:border-blue-500 outline-none">
+                        <option value="">Seleccionar</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveAccount()" class="flex-1 bg-gradient-to-r from-green-700 to-green-600 hover:from-green-600 hover:to-green-500 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all">
+                    GUARDAR
+                </button>
+                <button onclick="toggleAddForm()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-all">
+                    CANCELAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var accounts = [
+            { id: 1, category: 'ASTRO PAY GERAL', owner: 'Icorp Studios', email: 'icorp.studios@gmail.com', provider: 'AstroPay GBM', titular: '', cardType: 'Mastercard', lastDigits: '7229', date: '', status: 'Vencida', limiteNB: 'Cerrado', nivel: '', lastChange: '' },
+            { id: 2, category: 'ASTRO PAY GERAL', owner: 'Geral', email: 'geralbarzo05@gmail.com', provider: 'AstroPay GBM', titular: '', cardType: 'Visa', lastDigits: '7777', date: '29 nov 2025', status: 'Vencida', limiteNB: 'Cerrado', nivel: '', lastChange: '' },
+            { id: 3, category: 'ASTRO PAY MIGUEL', owner: 'Mentora', email: 'mentora.academias@gmail.com', provider: 'AstroPay LMRV', titular: '', cardType: 'Visa', lastDigits: '6807', date: '3 oct 2025', status: 'Vencida', limiteNB: 'Cerrado', nivel: '', lastChange: '' },
+            { id: 4, category: 'ASTRO PAY MIGUEL', owner: 'LM', email: 'lm7scorp.ion@gmail.com', provider: 'AstroPay LM', titular: '', cardType: 'Mastercard', lastDigits: '0197', date: '3 oct 2025', status: 'Activa', limiteNB: 'Abierto', nivel: '', lastChange: '' }
+        ];
+
+        var currentFilter = 'Todas';
+        var draggedElement = null;
+        var editingCell = null;
+
+        var nivelSelect = document.getElementById('newNivel');
+        for (var i = 1; i <= 20; i++) {
+            var option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            nivelSelect.appendChild(option);
+        }
+
+        function getCategoryColor(category) {
+            if (category.indexOf('GERAL') > -1) return 'bg-red-950/40 border-red-700/50';
+            if (category.indexOf('ASTRO PAY MIGUEL') > -1) return 'bg-blue-950/40 border-blue-700/50';
+            if (category.indexOf('LIGO') > -1) return 'bg-slate-800/40 border-slate-600/50';
+            return 'bg-slate-800';
+        }
+
+        function getStatusColor(status) {
+            return status === 'Activa' ? 'bg-green-500' : 'bg-red-500';
+        }
+
+        function getLimiteNBColor(limite) {
+            if (limite === 'Abierto') return 'bg-green-500';
+            if (limite === 'Casi Tope') return 'bg-orange-500';
+            return 'bg-red-500';
+        }
+
+        function getNextStatus(current) {
+            return current === 'Activa' ? 'Vencida' : 'Activa';
+        }
+
+        function getNextLimiteNB(current) {
+            if (current === 'Cerrado') return 'Abierto';
+            if (current === 'Abierto') return 'Casi Tope';
+            return 'Cerrado';
+        }
+
+        function getCardTypeColor(cardType) {
+            return cardType === 'Visa' ? 'text-blue-400' : 'text-orange-400';
+        }
+
+        function formatDateTime() {
+            var now = new Date();
+            var months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            var day = now.getDate();
+            var month = months[now.getMonth()];
+            var hours = String(now.getHours()).padStart(2, '0');
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            return day + month + ' ' + hours + ':' + minutes + 'h';
+        }
+
+        function updateCounts() {
+            var active = 0;
+            var inactive = 0;
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].status === 'Activa') active++;
+                else inactive++;
+            }
+            document.getElementById('activeCount').textContent = active + ' Activas';
+            document.getElementById('inactiveCount').textContent = inactive + ' Vencidas';
+            document.getElementById('totalCount').textContent = accounts.length + ' Total';
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            var baseClass = 'px-4 py-2 rounded-lg font-bold transition-all';
+            var activeClass = baseClass + ' bg-gradient-to-r from-blue-700 to-slate-700 text-white scale-105';
+            var inactiveClass = baseClass + ' bg-slate-700 text-slate-400 hover:bg-slate-600';
+            var greenClass = baseClass + ' bg-green-700 text-white scale-105';
+            var redClass = baseClass + ' bg-red-700 text-white scale-105';
+            
+            document.getElementById('filterTodas').className = filter === 'Todas' ? activeClass : inactiveClass;
+            document.getElementById('filterActiva').className = filter === 'Activa' ? greenClass : inactiveClass;
+            document.getElementById('filterVencida').className = filter === 'Vencida' ? redClass : inactiveClass;
+            renderTable();
+        }
+
+        function toggleAddForm() {
+            var form = document.getElementById('addForm');
+            form.classList.toggle('hidden');
+        }
+
+        function saveAccount() {
+            var maxId = 0;
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id > maxId) maxId = accounts[i].id;
+            }
+            var newAccount = {
+                id: maxId + 1,
+                category: document.getElementById('newCategory').value,
+                owner: document.getElementById('newOwner').value,
+                email: document.getElementById('newEmail').value,
+                provider: document.getElementById('newProvider').value,
+                titular: document.getElementById('newTitular').value,
+                cardType: document.getElementById('newCardType').value,
+                lastDigits: document.getElementById('newLastDigits').value,
+                date: document.getElementById('newDate').value,
+                status: document.getElementById('newStatus').value,
+                limiteNB: document.getElementById('newLimiteNB').value,
+                nivel: document.getElementById('newNivel').value,
+                lastChange: ''
+            };
+            accounts.push(newAccount);
+            
+            document.getElementById('newOwner').value = '';
+            document.getElementById('newEmail').value = '';
+            document.getElementById('newProvider').value = '';
+            document.getElementById('newTitular').value = '';
+            document.getElementById('newLastDigits').value = '';
+            document.getElementById('newDate').value = '';
+            document.getElementById('newNivel').value = '';
+            
+            toggleAddForm();
+            renderTable();
+        }
+
+        function deleteAccount(id) {
+            var newAccounts = [];
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id !== id) {
+                    newAccounts.push(accounts[i]);
+                }
+            }
+            accounts = newAccounts;
+            renderTable();
+        }
+
+        function toggleStatus(id) {
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id === id) {
+                    accounts[i].status = getNextStatus(accounts[i].status);
+                    break;
+                }
+            }
+            renderTable();
+        }
+
+        function toggleLimiteNB(id) {
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id === id) {
+                    accounts[i].limiteNB = getNextLimiteNB(accounts[i].limiteNB);
+                    break;
+                }
+            }
+            renderTable();
+        }
+
+        function updateNivel(id, value) {
+            if (value) {
+                for (var i = 0; i < accounts.length; i++) {
+                    if (accounts[i].id === id) {
+                        accounts[i].nivel = value;
+                        accounts[i].lastChange = formatDateTime();
+                        break;
+                    }
+                }
+                renderTable();
+            }
+        }
+
+        function startEdit(id, field, currentValue, cellElement) {
+            if (editingCell) return;
+            editingCell = cellElement;
+            
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue;
+            input.className = 'bg-slate-900 text-white p-1 rounded border border-blue-500 outline-none text-sm w-full';
+            
+            input.onblur = function() {
+                finishEdit(id, field, input.value);
+            };
+            
+            input.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    finishEdit(id, field, input.value);
+                }
+            };
+            
+            cellElement.innerHTML = '';
+            cellElement.appendChild(input);
+            input.focus();
+        }
+
+        function finishEdit(id, field, value) {
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id === id) {
+                    accounts[i][field] = value;
+                    break;
+                }
+            }
+            editingCell = null;
+            renderTable();
+        }
+
+        function handleDragStart(e) {
+            draggedElement = e.target.closest('tr');
+            e.dataTransfer.effectAllowed = 'move';
+            draggedElement.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            var target = e.target.closest('tr');
+            if (!target || target === draggedElement) return;
+            
+            var draggedId = parseInt(draggedElement.dataset.id);
+            var targetId = parseInt(target.dataset.id);
+            
+            var draggedIndex = -1;
+            var targetIndex = -1;
+            for (var i = 0; i < accounts.length; i++) {
+                if (accounts[i].id === draggedId) draggedIndex = i;
+                if (accounts[i].id === targetId) targetIndex = i;
+            }
+            
+            var removed = accounts.splice(draggedIndex, 1)[0];
+            accounts.splice(targetIndex, 0, removed);
+            
+            renderTable();
+        }
+
+        function handleDragEnd() {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+            }
+        }
+
+        function createRow(account, originalIndex) {
+            var tr = document.createElement('tr');
+            tr.draggable = true;
+            tr.dataset.id = account.id;
+            tr.className = 'border-b border-slate-700 hover:bg-slate-700/50 transition-colors ' + getCategoryColor(account.category) + ' border-l-4';
+            tr.ondragstart = handleDragStart;
+            tr.ondragover = handleDragOver;
+            tr.ondragend = handleDragEnd;
+            
+            var cells = [
+                { content: '☰', className: 'p-3 text-center cursor-move' },
+                { content: '<span class="inline-block bg-blue-700 text-white font-bold px-3 py-1 rounded-full text-xs">' + (originalIndex + 1) + '</span>', className: 'p-3 text-center' },
+                { content: account.owner || '-', className: 'p-3 text-orange-300 font-semibold', editable: true, field: 'owner' },
+                { content: account.email || '-', className: 'p-3 text-blue-300 text-xs', editable: true, field: 'email' },
+                { content: '<button onclick="toggleStatus(' + account.id + ')" class="inline-block w-20 px-2 py-1 rounded-full text-white text-xs font-bold transition-all hover:scale-110 cursor-pointer ' + getStatusColor(account.status) + '">' + account.status + '</button>', className: 'p-3 text-center' },
+                { content: account.provider || '-', className: 'p-3 text-slate-300', editable: true, field: 'provider' },
+                { content: account.titular || '-', className: 'p-3 text-green-400 font-semibold', editable: true, field: 'titular' },
+                { content: account.cardType, className: 'p-3 font-bold ' + getCardTypeColor(account.cardType) },
+                { content: '.... ' + account.lastDigits, className: 'p-3 text-orange-400 font-mono font-bold text-base' },
+                { content: account.date || '-', className: 'p-3 text-amber-400 text-xs', editable: true, field: 'date' },
+                { content: '<button onclick="toggleLimiteNB(' + account.id + ')" class="inline-block w-24 px-2 py-1 rounded-full text-white text-xs font-bold transition-all hover:scale-110 cursor-pointer ' + getLimiteNBColor(account.limiteNB) + '">' + account.limiteNB + '</button>', className: 'p-3 text-center' }
+            ];
+            
+            for (var i = 0; i < cells.length; i++) {
+                var td = document.createElement('td');
+                td.className = cells[i].className;
+                td.innerHTML = cells[i].content;
+                
+                if (cells[i].editable) {
+                    td.ondblclick = (function(id, field, value, cell) {
+                        return function() {
+                            startEdit(id, field, value, cell);
+                        };
+                    })(account.id, cells[i].field, cells[i].content, td);
+                }
+                
+                tr.appendChild(td);
+            }
+            
+            var tdNivel = document.createElement('td');
+            tdNivel.className = 'p-3 text-center';
+            var selectNivel = document.createElement('select');
+            selectNivel.className = 'bg-slate-700 text-white px-3 py-1 rounded border border-slate-600 focus:border-blue-500 outline-none text-sm font-bold';
+            selectNivel.onchange = (function(id) {
+                return function() {
+                    updateNivel(id, this.value);
+                };
+            })(account.id);
+            
+            var optEmpty = document.createElement('option');
+            optEmpty.value = '';
+            optEmpty.textContent = '-';
+            selectNivel.appendChild(optEmpty);
+            
+            for (var j = 1; j <= 20; j++) {
+                var opt = document.createElement('option');
+                opt.value = j;
+                opt.textContent = j;
+                if (account.nivel == j) opt.selected = true;
+                selectNivel.appendChild(opt);
+            }
+            tdNivel.appendChild(selectNivel);
+            tr.appendChild(tdNivel);
+            
+            var tdChange = document.createElement('td');
+            tdChange.className = 'p-3 text-cyan-400 text-xs font-semibold';
+            tdChange.textContent = account.lastChange || '-';
+            tr.appendChild(tdChange);
+            
+            var tdDelete = document.createElement('td');
+            tdDelete.className = 'p-3 text-center';
+            var btnDelete = document.createElement('button');
+            btnDelete.className = 'text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded transition-colors';
+            btnDelete.textContent = 'X';
+            btnDelete.onclick = (function(id) {
+                return function() {
+                    deleteAccount(id);
+                };
+            })(account.id);
+            tdDelete.appendChild(btnDelete);
+            tr.appendChild(tdDelete);
+            
+            return tr;
+        }
+
+        function renderTable() {
+            var tbody = document.getElementById('accountsTable');
+            tbody.innerHTML = '';
+            
+            var filtered = [];
+            for (var i = 0; i < accounts.length; i++) {
+                if (currentFilter === 'Todas' || accounts[i].status === currentFilter) {
+                    filtered.push(accounts[i]);
+                }
+            }
+            
+            for (var i = 0; i < filtered.length; i++) {
+                var account = filtered[i];
+                var originalIndex = -1;
+                for (var j = 0; j < accounts.length; j++) {
+                    if (accounts[j].id === account.id) {
+                        originalIndex = j;
+                        break;
+                    }
+                }
+                
+                var row = createRow(account, originalIndex);
+                tbody.appendChild(row);
+            }
+            
+            updateCounts();
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
